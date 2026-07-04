@@ -42,7 +42,7 @@ import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 
-from rocket_rl.config import EnvConfig
+from config import EnvConfig
 
 G0 = 9.80665 
 THETA_SCALE = math.pi / 2.0
