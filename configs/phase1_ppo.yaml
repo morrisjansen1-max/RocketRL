@@ -1,0 +1,43 @@
+# Phase 1: minimal environment, fixed inertial mass, no wind/drag, no gimbal
+# (ideal direct attitude torque via an oversized "RCS"), simple shaped reward.
+# Goal: prove PPO learns to land and the train -> eval -> plot pipeline works.
+run_name: phase1_ppo
+seed: 0
+algo: ppo
+total_timesteps: 10_000_000
+n_envs: 8
+device: cpu
+
+eval:
+  freq: 25000
+  n_episodes: 20
+
+env:
+  gimbal_max_deg: 0.0        # phase 1: no thrust vectoring
+  rcs_max_torque: 2.5e+6     # phase 1: ideal attitude torque actuator
+  mass_depletion: false      # phase 1: constant inertial mass
+  cda: 0.0                   # phase 1: no aerodynamics
+  wind:
+    enabled: false
+  init:                      # phase 1: benign near-overhead starts
+    x: [-15.0, 15.0]
+    y: [90.0, 110.0]
+    vx: [-1.0, 1.0]
+    vy: [-10.0, -6.0]
+    theta_deg: [-3.0, 3.0]
+    omega: [-0.05, 0.05]
+
+# PPO hyperparameters adapted from rl-baselines3-zoo LunarLanderContinuous
+# (batch_size raised for CPU throughput, n_envs reduced for a laptop).
+algo_kwargs:
+  learning_rate: lin_3.0e-4   # linear anneal to 0: prevents late-training collapse
+  n_steps: 1024
+  batch_size: 256
+  n_epochs: 4
+  gamma: 0.999
+  gae_lambda: 0.98
+  clip_range: 0.2
+  ent_coef: 0.0   # entropy bonus keeps action noise too high for the tight touchdown box
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  net_arch: [64, 64]
