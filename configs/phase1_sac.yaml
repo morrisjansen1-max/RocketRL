@@ -1,0 +1,40 @@
+# SAC on the phase-1 environment (from scratch), first stage of the SAC
+# curriculum chain, mirroring the PPO chain. Hyperparameters adapted from
+# rl-baselines3-zoo LunarLanderContinuous (net 256x256 = SB3 default).
+run_name: phase1_sac
+seed: 0
+algo: sac
+total_timesteps: 1_000_000
+n_envs: 8
+device: cpu
+
+eval:
+  freq: 25000
+  n_episodes: 20
+
+env:
+  gimbal_max_deg: 0.0
+  rcs_max_torque: 2.5e+6
+  mass_depletion: false
+  cda: 0.0
+  wind:
+    enabled: false
+  init:
+    x: [-15.0, 15.0]
+    y: [90.0, 110.0]
+    vx: [-1.0, 1.0]
+    vy: [-10.0, -6.0]
+    theta_deg: [-3.0, 3.0]
+    omega: [-0.05, 0.05]
+
+algo_kwargs:
+  learning_rate: 7.3e-4
+  buffer_size: 1_000_000
+  batch_size: 256
+  gamma: 0.99   
+  tau: 0.01
+  ent_coef: auto
+  train_freq: 1        # per vectorised step (= n_envs transitions)
+  gradient_steps: 8    # keep update-to-data ratio at 1 with n_envs = 8
+  learning_starts: 10000
+  net_arch: [256, 256]
