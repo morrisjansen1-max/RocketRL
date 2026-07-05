@@ -1,0 +1,43 @@
+# Phase 2a: fine-tune the phase-1 policy on the gimballed
+# vehicle. Replace the ideal attitude torque with the real actuators,
+# gimballed main engine (±8°, torque only while burning) + weak RCS sized
+# as a grid-fin stand-in (3e5 N m: trims during coast, gimbal dominates
+# in a burn). Everything else identical to phase 1 (fixed mass, no aero).
+run_name: phase2_ppo_gimbal
+init_from: runs/phase1_ppo_s{seed}/best_model.zip
+seed: 0
+algo: ppo
+total_timesteps: 5_000_000
+n_envs: 8
+device: cpu
+
+eval:
+  freq: 25000
+  n_episodes: 20
+
+env:
+  # gimbal_max_deg (8) and rcs_max_torque (5e4) come from canonical defaults
+  mass_depletion: false
+  cda: 0.0
+  wind:
+    enabled: false
+  init:
+    x: [-15.0, 15.0]
+    y: [90.0, 110.0]
+    vx: [-1.0, 1.0]
+    vy: [-10.0, -6.0]
+    theta_deg: [-3.0, 3.0]
+    omega: [-0.05, 0.05]
+
+algo_kwargs:
+  learning_rate: lin_1.0e-4   # gentler: protect transferred skills
+  n_steps: 1024
+  batch_size: 256
+  n_epochs: 4
+  gamma: 0.999
+  gae_lambda: 0.98
+  clip_range: 0.2
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  net_arch: [64, 64]
