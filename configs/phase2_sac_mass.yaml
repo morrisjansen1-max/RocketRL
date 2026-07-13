@@ -1,0 +1,38 @@
+# SAC experiment, Phase 2b: fine-tune the SAC gimbal-stage
+# policy onto propellant depletion.
+run_name: phase2_sac_mass
+init_from: runs/phase2_sac_gimbal_s{seed}/best_model.zip
+seed: 0
+algo: sac
+total_timesteps: 1_000_000
+n_envs: 8
+device: cpu
+
+eval:
+  freq: 25000
+  n_episodes: 20
+
+env:
+  # mass_depletion true from defaults; still no aero/wind
+  cda: 0.0
+  wind:
+    enabled: false
+  init:
+    x: [-15.0, 15.0]
+    y: [90.0, 110.0]
+    vx: [-1.0, 1.0]
+    vy: [-10.0, -6.0]
+    theta_deg: [-3.0, 3.0]
+    omega: [-0.05, 0.05]
+
+algo_kwargs:
+  learning_rate: 3.0e-4
+  buffer_size: 1_000_000
+  batch_size: 256
+  gamma: 0.99
+  tau: 0.01
+  ent_coef: auto
+  train_freq: 1
+  gradient_steps: 8
+  learning_starts: 10000
+  net_arch: [256, 256]
